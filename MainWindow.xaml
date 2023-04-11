@@ -5,17 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RobotPainting"
         mc:Ignorable="d"
-        Title="Robot painting" Height="600" Width="800">
+        Title="Robot painting" Height="600" Width="800" Closed="Window_Closed">
     <StackPanel Orientation="Vertical">
         <Border CornerRadius="5" BorderBrush="AliceBlue" BorderThickness="2">
             <StackPanel Orientation="Horizontal" Height="30" Margin="10">
-                <Button x:Name="Clear" Content="Clear" Width="150px" Click="Clear_Click"></Button>
-                <Button Content="Test" Click="Button_Click"></Button>
-                <Button Content="Test" Click="Button_Click1"></Button>
+                <Button x:Name="Reset" Content="Clear" Width="100px" Click="Clear_Click"></Button>
+                <Button Margin="10,0" Width="100" Content="Connect" Click="Button_Click"></Button>
 
                 <Label Content="Robot position : "/>
-                <Label />
-                <Label Content="Position : "/>
+                <Label Name="Positions"/>
 
                 <Label Name="message"></Label>
             </StackPanel>

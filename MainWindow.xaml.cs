@@ -17,10 +17,42 @@ using System.Windows.Shapes;
 
 namespace RobotPainting
 {
-    public class Position
+    public class Robot
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public Robot(int sizeX, int sizeY)
+        {
+            width = sizeX;
+            height = sizeY;
+        }
+
+        int width;
+        int height;
+
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Angle { get; set; }
+
+        int speedX { get; set; }
+        int speedY { get; set; }
+
+        int speed = 5;
+        int margin = 40;
+
+        public void Rotate(int angle)
+        {
+            Angle = angle;
+            speedY = (int)(Math.Sin(angle * 2.0 * 3.14 / 360.0) * speed);
+            speedX = (int)(Math.Cos(angle * 2.0 * 3.14 / 360.0) * speed);
+        }
+
+        public void UpdatePosition()
+        {
+            if( X < width - margin && X > margin)
+                X += speedX;
+
+            if( Y > margin && Y < height - margin)
+                Y -= speedY;
+        }
     };
     
     /// <summary>
@@ -29,9 +61,13 @@ namespace RobotPainting
     public partial class MainWindow : Window
     {
         Line lineInProgress { get; set; }
-        int a = 0;
+        
+        public Robot robotPos = new Robot(500,700);
 
-        Position robotPos;
+        public bool moveEnable = false;
+        public bool rotate = false;
+        public bool printEnable = false;
+        public bool updatePrint = false;
         
         Thread t = new Thread(new ThreadStart(UdpHelper.Start));
 
@@ -39,40 +75,41 @@ namespace RobotPainting
         {
             InitializeComponent();
             UdpHelper.super = this;
+            init();
+        }
+
+        void init()
+        {
+            moveEnable = false;
+            rotate = false;
+            printEnable = false;
+            updatePrint = false;
+            robotPos.X = 100;
+            robotPos.Y = 200;
+            robotPos.Rotate(0);
+            MoveTo();
+            if( printEnable )
+                start_line();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            t.Start();
-            MoveTo(Robot, 300, 200);
+            if(!UdpHelper._continue)
+                t.Start();
         }
 
-        private void Button_Click1(object sender, RoutedEventArgs e)
-        {
-            if (a == 0)
-                start_line(10, 10);
-            else
-                update_line(a*20, a*40);
-
-            if( a == 3)
-            {
-                start_line(50, 50);
-            }
-            a++;
-        }
-
-        private void start_line(int x, int y)
+        private void start_line()
         {
             {
                 Line myLine = new Line();
                 myLine.Stroke = System.Windows.Media.Brushes.LightSteelBlue;
-                myLine.X1 = x;
-                myLine.X2 = x;
-                myLine.Y1 = y;
-                myLine.Y2 = y;
+                myLine.X1 = robotPos.X;
+                myLine.X2 = robotPos.X;
+                myLine.Y1 = robotPos.Y;
+                myLine.Y2 = robotPos.Y;
                 myLine.HorizontalAlignment = HorizontalAlignment.Left;
                 myLine.VerticalAlignment = VerticalAlignment.Center;
-                myLine.StrokeThickness = 2;
+                myLine.StrokeThickness = 4;
 
                 PaintingZone.Children.Add(myLine);
 
@@ -95,12 +132,46 @@ namespace RobotPainting
                     PaintingZone.Children.RemoveAt(i);
                 }
             }
+            init();
         }
 
-        private void MoveTo(Image target, double newX, double newY)
+        private void MoveTo()
         {
-            Canvas.SetLeft(target, newX);
-            Canvas.SetTop(target, newY);
+            Canvas.SetLeft(Robot, robotPos.X-30);
+            Canvas.SetTop(Robot, robotPos.Y-50);
+        }
+
+
+        public void Update()
+        {
+            if( rotate)
+            {
+                rotate = false;
+                start_line();
+            }
+
+            if (updatePrint && printEnable)
+                start_line();
+
+            if( moveEnable)
+            {
+                robotPos.UpdatePosition();
+                MoveTo();
+
+                if(printEnable)
+                    update_line(robotPos.X, robotPos.Y);
+            }
+
+            Positions.Content = "Pos X : " + robotPos.X + " / Y : " + robotPos.Y + " / angle : " + robotPos.Angle + " / Print : " + printEnable;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if (UdpHelper._continue)
+            {
+                UdpHelper.Stop();
+                t.Join();
+            }
         }
     }
 }
