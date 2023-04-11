@@ -5,21 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RobotPainting"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Robot painting" Height="600" Width="800">
     <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-            <Button x:Name="Clear" Content="Clear" Width="150px" Click="Clear_Click"></Button>
-            <Button Content="Test" Click="Button_Click"></Button>
-        </StackPanel>
+        <Border CornerRadius="5" BorderBrush="AliceBlue" BorderThickness="2">
+            <StackPanel Orientation="Horizontal" Height="30" Margin="10">
+                <Button x:Name="Clear" Content="Clear" Width="150px" Click="Clear_Click"></Button>
+                <Button Content="Test" Click="Button_Click"></Button>
+                <Button Content="Test" Click="Button_Click1"></Button>
+
+                <Label Content="Robot position : "/>
+                <Label />
+                <Label Content="Position : "/>
+
+                <Label Name="message"></Label>
+            </StackPanel>
+        </Border>
 
         <Canvas x:Name="PaintingZone">
-            <Line
-                X1="10" Y1="10"
-                X2="50" Y2="50"
-                Stroke="Black"
-                StrokeThickness="4" />
 
-            <Image Name="Robot" Height="65" Width="59" Source="/robot.png"/>
+            <Image Name="Robot" Height="65" Width="59" Source="/robot.png" Canvas.Left="100" Canvas.Top="100"/>
+            
         </Canvas>
         
     </StackPanel>

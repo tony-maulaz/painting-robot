@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,48 +17,90 @@ using System.Windows.Shapes;
 
 namespace RobotPainting
 {
+    public class Position
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+    };
+    
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        Line lineInProgress { get; set; }
+        int a = 0;
+
+        Position robotPos;
+        
+        Thread t = new Thread(new ThreadStart(UdpHelper.Start));
+
         public MainWindow()
         {
             InitializeComponent();
+            UdpHelper.super = this;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Line myLine = new Line();
-            myLine.Stroke = System.Windows.Media.Brushes.LightSteelBlue;
-            myLine.X1 = 1;
-            myLine.X2 = 50;
-            myLine.Y1 = 1;
-            myLine.Y2 = 50;
-            myLine.HorizontalAlignment = HorizontalAlignment.Left;
-            myLine.VerticalAlignment = VerticalAlignment.Center;
-            myLine.StrokeThickness = 2;
-
-            PaintingZone.Children.Add(myLine);
-
+            t.Start();
             MoveTo(Robot, 300, 200);
+        }
+
+        private void Button_Click1(object sender, RoutedEventArgs e)
+        {
+            if (a == 0)
+                start_line(10, 10);
+            else
+                update_line(a*20, a*40);
+
+            if( a == 3)
+            {
+                start_line(50, 50);
+            }
+            a++;
+        }
+
+        private void start_line(int x, int y)
+        {
+            {
+                Line myLine = new Line();
+                myLine.Stroke = System.Windows.Media.Brushes.LightSteelBlue;
+                myLine.X1 = x;
+                myLine.X2 = x;
+                myLine.Y1 = y;
+                myLine.Y2 = y;
+                myLine.HorizontalAlignment = HorizontalAlignment.Left;
+                myLine.VerticalAlignment = VerticalAlignment.Center;
+                myLine.StrokeThickness = 2;
+
+                PaintingZone.Children.Add(myLine);
+
+                lineInProgress = myLine;
+            }
+        }
+
+        private void update_line(int x, int y)
+        {
+            lineInProgress.X2 = x;
+            lineInProgress.Y2 = y;
         }
 
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
-            PaintingZone.Children.Clear();
+            for (int i = PaintingZone.Children.Count - 1; i >= 0; i--)
+            {
+                if (PaintingZone.Children[i] is Line)
+                {
+                    PaintingZone.Children.RemoveAt(i);
+                }
+            }
         }
 
         private void MoveTo(Image target, double newX, double newY)
         {
-            var top = 0;// Canvas.GetTop(target);
-            var left = 0;//Canvas.GetLeft(target);
-            TranslateTransform trans = new TranslateTransform();
-            target.RenderTransform = trans;
-            DoubleAnimation anim1 = new DoubleAnimation(top, newY - top, TimeSpan.FromSeconds(10));
-            DoubleAnimation anim2 = new DoubleAnimation(left, newX - left, TimeSpan.FromSeconds(10));
-            trans.BeginAnimation(TranslateTransform.XProperty, anim1);
-            trans.BeginAnimation(TranslateTransform.YProperty, anim2);
+            Canvas.SetLeft(target, newX);
+            Canvas.SetTop(target, newY);
         }
     }
 }
