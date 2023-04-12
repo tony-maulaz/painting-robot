@@ -47,11 +47,13 @@ namespace RobotPainting
 
         public void UpdatePosition()
         {
-            if( X < width - margin && X > margin)
-                X += speedX;
+            var newX = X + speedX;
+            if ( newX < width - margin && newX > margin )
+                X = newX;
 
-            if( Y > margin && Y < height - margin)
-                Y -= speedY;
+            var newY = Y - speedY;
+            if (newY < height - margin && newY > margin )
+                Y = newY;
         }
     };
     
@@ -76,6 +78,7 @@ namespace RobotPainting
             InitializeComponent();
             UdpHelper.super = this;
             init();
+            this.DataContext = robotPos;
         }
 
         void init()
@@ -94,8 +97,12 @@ namespace RobotPainting
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if(!UdpHelper._continue)
+            if (!UdpHelper._continue)
+            {
+                var uri = new Uri("pack://application:,,,/images/ok.png");
+                ImgConnected.Source = new BitmapImage(uri);
                 t.Start();
+            }
         }
 
         private void start_line()
@@ -137,21 +144,28 @@ namespace RobotPainting
 
         private void MoveTo()
         {
-            Canvas.SetLeft(Robot, robotPos.X-30);
-            Canvas.SetTop(Robot, robotPos.Y-50);
+            Canvas.SetLeft(Robot, robotPos.X-19);
+            //Canvas.SetLeft(Robot, robotPos.X);
+            Canvas.SetTop(Robot, robotPos.Y-32);
+            //Canvas.SetTop(Robot, robotPos.Y);
         }
 
 
         public void Update()
         {
-            if( rotate)
+            if( rotate )
             {
+                RotateTransform r = new RotateTransform(robotPos.Angle % 90);
+                Robot.RenderTransform = r;
                 rotate = false;
                 start_line();
             }
 
             if (updatePrint && printEnable)
+            {
                 start_line();
+                updatePrint = false;
+            }
 
             if( moveEnable)
             {
@@ -162,7 +176,9 @@ namespace RobotPainting
                     update_line(robotPos.X, robotPos.Y);
             }
 
-            Positions.Content = "Pos X : " + robotPos.X + " / Y : " + robotPos.Y + " / angle : " + robotPos.Angle + " / Print : " + printEnable;
+            Positions.Content = "Pos X : " + robotPos.X + " / Y : " + robotPos.Y + " / angle : " + 
+                robotPos.Angle + " / Print : " + printEnable +
+                " / Move : " + moveEnable;
         }
 
         private void Window_Closed(object sender, EventArgs e)
