@@ -28,12 +28,12 @@ namespace RobotPainting
         int width;
         int height;
 
-        public int X { get; set; }
-        public int Y { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
         public int Angle { get; set; }
 
-        int speedX { get; set; }
-        int speedY { get; set; }
+        public double speedX { get; set; }
+        public double speedY { get; set; }
 
         int speed = 5;
         int margin = 40;
@@ -41,8 +41,8 @@ namespace RobotPainting
         public void Rotate(int angle)
         {
             Angle = angle;
-            speedY = (int)(Math.Sin(angle * 2.0 * 3.14 / 360.0) * speed);
-            speedX = (int)(Math.Cos(angle * 2.0 * 3.14 / 360.0) * speed);
+            speedY = (Math.Sin(angle * 2.0 * 3.14 / 360.0) * speed);
+            speedX = (Math.Cos(angle * 2.0 * 3.14 / 360.0) * speed);
         }
 
         public void UpdatePosition()
@@ -63,8 +63,9 @@ namespace RobotPainting
     public partial class MainWindow : Window
     {
         Line lineInProgress { get; set; }
+        int lineCpt = 0;
         
-        public Robot robotPos = new Robot(500,700);
+        public Robot robotPos = new Robot(800,600);
 
         public bool moveEnable = false;
         public bool rotate = false;
@@ -93,6 +94,8 @@ namespace RobotPainting
             MoveTo();
             if( printEnable )
                 start_line();
+
+            Log.Text = "Log : \n";
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -121,10 +124,13 @@ namespace RobotPainting
                 PaintingZone.Children.Add(myLine);
 
                 lineInProgress = myLine;
-            }
+
+                lineCpt += 1;
+                Log.Text += lineCpt + " - X : " + robotPos.X.ToString("F0") + " / Y : " + robotPos.Y.ToString("F0") + "\n";
+             }
         }
 
-        private void update_line(int x, int y)
+        private void update_line(double x, double y)
         {
             lineInProgress.X2 = x;
             lineInProgress.Y2 = y;
@@ -176,8 +182,9 @@ namespace RobotPainting
                     update_line(robotPos.X, robotPos.Y);
             }
 
-            Positions.Content = "Pos X : " + robotPos.X + " / Y : " + robotPos.Y + " / angle : " + 
-                robotPos.Angle + " / Print : " + printEnable +
+            Positions.Content = "Pos X : " + robotPos.X.ToString("F0") + " / Y : " + robotPos.Y.ToString("F0") + 
+                //" Speed X : " + robotPos.speedX.ToString("F2") + " / Y : " + robotPos.speedY.ToString("F2") + 
+                " / angle : " + robotPos.Angle + " / Print : " + printEnable +
                 " / Move : " + moveEnable;
         }
 
